@@ -1,0 +1,186 @@
+@property --hero-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -75deg;
+}
+
+@property --hero-angle-2 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -45deg;
+}
+
+.hero {
+  --hero-border-width: 1.5px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(
+    to bottom left,
+    color-mix(in srgb, var(--rose) 36%, white) 0%,
+    color-mix(in srgb, var(--rose) 22%, transparent) 42%,
+    color-mix(in srgb, var(--rose) 9%, transparent) 72%,
+    transparent 100%
+  );
+  box-shadow:
+    0 12px 24px rgba(73, 83, 91, 0.14),
+    0 4px 2px -2px rgba(43, 50, 56, 0.18),
+    inset 0 2px 2px rgba(43, 50, 56, 0.05),
+    inset 0 -2px 2px rgba(255, 255, 255, 0.55),
+    inset 0 0 2px 4px rgba(255, 255, 255, 0.2);
+  transform: translateY(0) scale(1);
+  transform-origin: center;
+  transition:
+    transform 360ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 360ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hero h1,
+.hero p,
+.hero button,
+.hero button span {
+  text-shadow: 0 2px 0 rgba(108, 108, 108, 0.24);
+  transition: text-shadow 220ms ease, transform 360ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 边框光晕环：白色基底环 + 随 --hero-angle 旋转的深色镜面光斑，
+   mask-composite: exclude 只留下 padding 形成的细环 */
+.hero::before {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--hero-border-width);
+  background:
+    conic-gradient(
+      from var(--hero-angle) at 50% 50%,
+      rgba(43, 50, 56, 0.42),
+      rgba(43, 50, 56, 0) 5% 40%,
+      rgba(43, 50, 56, 0.42) 50%,
+      rgba(43, 50, 56, 0) 60% 95%,
+      rgba(43, 50, 56, 0.42)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.55));
+  box-shadow: inset 0 0 0 calc(var(--hero-border-width) / 2) rgba(255, 255, 255, 0.5);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  content: "";
+  pointer-events: none;
+  transition: --hero-angle 500ms ease;
+}
+
+/* 表面扫光：screen 混合的斜向高光带，hover 时沿 --hero-angle-2 方向扫过表面。
+   放在内容层(z-10)之下，只提亮玻璃表面、不洗白文字 */
+.hero::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    var(--hero-angle-2),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.45) 40% 50%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  content: "";
+  pointer-events: none;
+  transition:
+    background-position 500ms cubic-bezier(0.25, 1, 0.5, 1),
+    --hero-angle-2 500ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hero:hover,
+.hero:focus-within {
+  box-shadow:
+    0 6px 12px rgba(73, 83, 91, 0.12),
+    0 2px 1px -1px rgba(43, 50, 56, 0.24),
+    inset 0 2px 2px rgba(43, 50, 56, 0.05),
+    inset 0 -2px 2px rgba(255, 255, 255, 0.55),
+    inset 0 0 1px 2px rgba(255, 255, 255, 0.5);
+  transform: translateY(2px) scale(0.996);
+}
+
+.hero:active {
+  transform: translateY(3px) scale(0.992);
+}
+
+.hero:hover h1,
+.hero:hover p,
+.hero:hover button,
+.hero:hover button span,
+.hero:focus-within h1,
+.hero:focus-within p,
+.hero:focus-within button,
+.hero:focus-within button span {
+  text-shadow: 0 1px 0 rgba(108, 108, 108, 0.14);
+}
+
+.hero:hover::before,
+.hero:focus-within::before {
+  --hero-angle: -125deg;
+}
+
+.hero:active::before {
+  --hero-angle: -75deg;
+}
+
+.hero:hover::after,
+.hero:focus-within::after {
+  background-position: 25% 50%;
+}
+
+.hero:active::after {
+  --hero-angle-2: -15deg;
+  background-position: 50% 15%;
+}
+
+.glass {
+  position: absolute;
+  z-index: -1;
+  inset: -8%;
+  pointer-events: none;
+  background:
+    linear-gradient(116deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.1) 32%, transparent 50%),
+    radial-gradient(ellipse at 72% 112%, rgba(255, 255, 255, 0.24), transparent 45%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 24%, rgba(255, 255, 255, 0.07));
+  background-position: 0 center;
+  background-size: 180% 180%, auto, auto;
+  backdrop-filter: blur(3px) saturate(112%);
+  opacity: 0.9;
+  transition:
+    opacity 360ms ease,
+    background-position 500ms cubic-bezier(0.25, 1, 0.5, 1),
+    backdrop-filter 360ms ease;
+}
+
+.hero:hover .glass,
+.hero:focus-within .glass {
+  background-position: 18% center;
+  backdrop-filter: blur(1px) saturate(120%);
+  opacity: 0.76;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero,
+  .hero::before,
+  .hero::after,
+  .hero h1,
+  .hero p,
+  .hero button,
+  .hero button span,
+  .glass {
+    transition: none;
+  }
+
+  .hero:hover,
+  .hero:focus-within,
+  .hero:active {
+    transform: none;
+  }
+}

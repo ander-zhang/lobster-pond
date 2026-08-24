@@ -1,0 +1,11 @@
+{
+  "type": "knowledge",
+  "title": "HTTP 重试策略",
+  "tags": ["http", "reliability"],
+  "domain": "平台运营",
+  "category": "便捷指南",
+  "summary": "说明服务间 HTTP 请求的重试策略。",
+  "body": "# HTTP 重试策略\n\n正文内容应包含适用范围、步骤、限制与验证方式。",
+  "version": "1.0.0",
+  "evidence": "生产故障复盘"
+}

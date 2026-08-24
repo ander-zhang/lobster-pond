@@ -1,0 +1,14 @@
+{
+  "title": "接口返回异常",
+  "summary": "生产环境调用服务时持续返回 502，需要排查上游依赖。",
+  "domain": "平台运营",
+  "fields": {
+    "problemType": "上游服务不可用",
+    "triggerScenario": "生产环境高峰时段调用订单服务",
+    "triedMethods": "检查网关日志、重试、切换备用节点",
+    "currentResult": "重试后仍有约 5% 请求返回 502"
+  },
+  "timeline": [],
+  "knowledgeRefs": [],
+  "skillRefs": []
+}

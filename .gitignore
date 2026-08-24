@@ -1,0 +1,75 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# next.js
+/.next/
+/out/
+
+# TypeScript 增量构建缓存（每次构建变动，不入库）
+/tsconfig.tsbuildinfo
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+# stray verification logs from "start server + tail log" attempts
+.dev-server*.log
+.start-bg.log
+.start-server*.log
+
+# local backups and database exports
+*.bak
+*.dump
+*.sqlite
+*.sqlite3
+
+# env
+.env*
+!.env.example
+
+# local tool caches
+.npm-cache/
+.appdata/
+# dev 启动前自动清理脚本的基线标记（scripts/clean-next.ts）
+.next-clean-stamp
+# Codex agent runtime (per-port server logs, isolated npm/appdata cache)
+.codex-runtime/
+
+.vercel
+.gstack/
+
+.playwright-mcp/
+
+# agent / 本地工作区产物（不入库）
+.claude/*
+# 例外：项目级 skill（虾塘 MCP 接入契约）入库，其余 .claude 子目录（projects/settings.local/worktrees）仍忽略
+!.claude/skills/
+!.claude/skills/**
+.superpowers/
+AGENTS.md
+# 设计参考与产品草稿（本地留存）
+design-md/
+DESIGN.md
+PRODUCT.md
+# 部署配置由远端管理，本地 vercel.json 不入库
+vercel.json
+# MCP 工具配置参考 tools.md 已入库跟踪（供网关管理后台对齐 + 契约测试断言，不再 gitignore）
+
+# Next.js 自动生成，dev/build 会来回翻转 import 路径，不入库避免提交噪音
+next-env.d.ts
