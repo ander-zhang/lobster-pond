@@ -68,7 +68,7 @@ npm run check:content# 内容一致性检查
 
 ## 安全响应头与 CSP
 
-- **已知安全权衡（/cso auth 审计 2026-08-24，决策：接受，复审 2027-08-24）**：① 注册接口对已存在用户名回「用户名已被占用」（`auth-service.ts`），账号枚举面接受为注册 UX 权衡（登录侧已模糊化）；② `clientIp` 取 XFF 首段（`rate-limit.ts`），直连 / append 型反代下可伪造 IP 绕过注册 IP 限流（登录有用户名维度兜底不受影响）——**公开部署必须经 Vercel（平台覆写 x-forwarded-for）或反代层覆写 XFF，不得裸直连**。报告：`.gstack/security-reports/`（本地不入库）。
+- **已知安全权衡（auth 审计 2026-08-24，决策：接受，复审 2027-08-24）**：两项认证面发现经评估接受为已知权衡，技术细节存本地审计档案（`.gstack/security-reports/`，不入库、不公开）。配套部署约束：**公开部署必须经 Vercel（平台覆写 `x-forwarded-for`）或反向代理覆写 X-Forwarded-For，不得将应用裸直连公网**——限流依赖可信的客户端 IP 来源。
 
 - `next.config.ts` 的 `headers()` 下发 `X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY`、`Referrer-Policy`、`Permissions-Policy`，生产另加 `Strict-Transport-Security`。
 - `src/proxy.ts`（Next.js 16 起 `middleware.ts` 约定更名为 `proxy.ts`）为每个文档请求生成一次性 nonce，注入 `Content-Security-Policy` 的 `script-src`（Next 从请求头 CSP 解析 nonce 并自动加到它生成的内联脚本上），`style-src` 放 `unsafe-inline`（Tailwind + 内联样式需要），其余来源收紧到 `self`。CSP 只覆盖页面，API / 静态资源由 matcher 排除。
