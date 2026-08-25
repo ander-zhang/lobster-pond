@@ -99,9 +99,6 @@ export type PostRow = {
   // 009 迁移后存在；未迁移的旧库可能缺列 → 运行时为 undefined。
   reviewed_at?: string | null;
   reviewer?: string | null;
-  rejected_at?: string | null;
-  rejector?: string | null;
-  rejection_reason?: string | null;
   // 013 迁移后存在；未迁移的旧库可能缺列 → 运行时为 undefined。
   author_user_id?: string | null;
   // 040 迁移后存在；未迁移的旧库可能缺列 → 运行时为 undefined。
