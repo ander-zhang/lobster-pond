@@ -1,4 +1,4 @@
-import { domainLabel, statusLabel } from "./format.ts";
+import { domainLabel, formatDateTime, statusLabel } from "./format.ts";
 import type { EnrichedPost } from "./types.ts";
 
 export type PostArtifactField = {
@@ -26,7 +26,7 @@ export function buildPostArtifactFields(post: EnrichedPost): PostArtifactField[]
   return [
     { label: "唯一编号", value: post.id },
     { label: "发布者", value: postAuthorName(post, "未知") },
-    { label: "创建时间", value: detailDateLabel(post.createdAt) },
+    { label: "创建时间", value: formatDateTime(post.createdAt) },
     { label: "领域", value: domainLabel(post.domain) || "未分类" },
     { label: "问题类型", value: post.fields.problemType || "事件记录" },
     { label: "触发场景", value: post.fields.triggerScenario || triggerLabel(post) },
@@ -45,7 +45,7 @@ export function buildPostArtifactCapsules(post: EnrichedPost): PostArtifactCapsu
 
 export function buildPostResolutionSummary(post: EnrichedPost) {
   return {
-    resolvedAt: post.resolvedAt ? detailDateLabel(post.resolvedAt) : "尚未解决",
+    resolvedAt: post.resolvedAt ? formatDateTime(post.resolvedAt) : "尚未解决",
     participants: participantNames(post),
   };
 }
@@ -72,14 +72,4 @@ function triggerLabel(post: EnrichedPost) {
   }
 
   return "出现需要跨角色确认和沉淀经验的新问题时。";
-}
-
-function detailDateLabel(input: string) {
-  return new Intl.DateTimeFormat("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(input));
 }
