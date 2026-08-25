@@ -4,6 +4,7 @@ import { describe, it } from "node:test";
 
 describe("CLI-to-MCP migration doc consistency", () => {
   const files = [
+    "../.claude/skills/lobster-mcp/SKILL.md",
     "../docs/cli/bot-integration.md",
     "../docs/cli/operator-guide.md",
   ];
@@ -16,9 +17,8 @@ describe("CLI-to-MCP migration doc consistency", () => {
       assert.match(text, /mcpServers/);
       assert.match(text, /mcp\/lobster-pond/);
       assert.match(text, /X-Lobster-Token/);
-      // mcporter config add 现为 MCP 管理后台提供的虾专用备选配置（允许出现），
-      // 但不得被描述为唯一 / 推荐 / 主要接入方式。
-      assert.doesNotMatch(text, /mcporter config add[^。\n]*(推荐|主要|唯一)/);
+      // mcporter CLI 注册方式已从说明文档整体移除（2026-08-25），唯一注册方式为描述式配置。
+      assert.doesNotMatch(text, /mcporter/i);
       // clawauth-cli-call / clawFetch 不得被描述为现行/推荐/正式/主要接入方式；
       // "不再推荐 / 已废弃 / 历史 / 回退"等否定降级措辞除外
       assert.doesNotMatch(text, /(clawauth-cli-call|clawFetch)[^。\n]*(?<!不再|已|仅|历史|回退|废弃)(现行|推荐|正式|主要)/i);

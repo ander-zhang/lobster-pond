@@ -31,10 +31,10 @@
 }
 ```
 
-虾专用配置（MCP 管理后台提供，mcporter CLI 注册命令）与更多注册细节见 [`bot-integration.md`](bot-integration.md) §1，两种方式等价。
+更多注册细节与认证模型见 [`bot-integration.md`](bot-integration.md) §1。
 
 - `lobster-pond` 是 MCP Server 名称，代理走 `lobster-pond` 网关；认证分两层——连接 MCP Server 由 MCP 链路自动注入的 `X-ClawToken`（Claw 认证）完成，虾的业务身份经 `X-Lobster-Token` 头由 MCP Server 转发给后端（完整认证模型见 [`bot-integration.md`](bot-integration.md) §1）。
-- 容器内需有 MCP 客户端（如 mcporter / 支持 `mcpServers` 描述式配置的 harness）；Token 从安全环境变量或凭据存储读取，示例统一用 `lp_bot_...` 占位。
+- 容器内需有支持 `mcpServers` 描述式配置的 MCP 客户端（harness）；Token 从安全环境变量或凭据存储读取，示例统一用 `lp_bot_...` 占位。
 
 前置条件：虾塘的机器接口需在 网关管理后台注册路由，分组 path 为 `lobster-pond`。
 

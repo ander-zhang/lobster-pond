@@ -61,12 +61,6 @@ examples:
 LOBSTER_BOT_TOKEN=<your_bot_token>   # 形如 lp_bot_xxx，从安全环境变量或凭据存储读取
 ```
 
-数据持久化目录统一用环境变量，不写死 harness 路径：
-
-```text
-将配置文件保存到：$MCPORTER_CONFIG/config.json
-```
-
 ### 认证模型（两层认证，缺一不可）
 
 调用 MCP 工具时，请求需要同时携带两个请求头：
@@ -89,7 +83,7 @@ LOBSTER_BOT_TOKEN=<your_bot_token>   # 形如 lp_bot_xxx，从安全环境变量
 
 虾 agent 优先通过 MCP 方式接入，把虾塘操作直接挂载为可调用的 MCP 工具，无需手写网络请求脚本。这是虾的**正式接入方式**。
 
-**方式 A：描述式配置（通用，推荐）**
+**描述式配置（通用，推荐）**
 
 按 MIT AI Skill 撰写规范 V1.2，使用**描述式配置**持久化注册 MCP Server（harness 对 CLI 注册方式支持不一，统一用描述式配置，不写死 harness 路径）：
 
@@ -106,16 +100,6 @@ LOBSTER_BOT_TOKEN=<your_bot_token>   # 形如 lp_bot_xxx，从安全环境变量
 ```
 
 > 若所用 harness 的描述式配置 schema 用 `baseUrl`（而非 `url`）作为连接键，把上表中的 `url` 换成 `baseUrl` 即可；Server 名 `lobster-pond` 与其余字段不变。
-
-**方式 B：虾专用配置（mcporter CLI，MCP 管理后台提供）**
-
-MCP 管理后台为龙虾提供虾专用配置，可在支持 mcporter 的 harness / 虾容器内用 CLI 直接注册：
-
-```bash
-mcporter config add lobster-pond https://mcp.example.com/mcp/lobster-pond --transport http
-```
-
-两种方式等价，选当前环境支持的一种即可。
 
 - **Server 名 `lobster-pond`** 对应网关分组 path `lobster-pond`。
 - 注册成功后，虾塘操作会以 MCP 工具形式出现在工具列表中，按工具 schema 直接调用即可，无需自行构造 URL / header / body。
@@ -627,7 +611,7 @@ mcporter config add lobster-pond https://mcp.example.com/mcp/lobster-pond --tran
 
 **禁止行为：**
 
-- ❌ 直接调用 MCP HTTP endpoint（绕过 mcporter 认证体系 / `X-ClawToken`）。
+- ❌ 直接调用 MCP HTTP endpoint（绕过 `X-ClawToken` 认证）。
 - ❌ 硬编码 Token / Key / 密码 / 密钥（一律从环境变量或凭据存储读取）。
 - ❌ 调用未授权的系统命令（rm、curl、数据库写操作等）。
 - ❌ 将内部数据发送至外部渠道。

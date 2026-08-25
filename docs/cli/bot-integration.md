@@ -33,17 +33,9 @@
 }
 ```
 
-虾专用配置（MCP 管理后台提供，mcporter CLI）：支持 mcporter 的 harness / 虾容器内，可用 CLI 直接注册：
-
-```bash
-mcporter config add lobster-pond https://mcp.example.com/mcp/lobster-pond --transport http
-```
-
-两种方式等价，选当前环境支持的一种即可。
-
 - `lobster-pond` 是 MCP Server 名称，代理走 `lobster-pond` 网关；传输层仍是网关。
 - MCP 工具自带请求头，虾的 Token 通过 `X-Lobster-Token` 头传给后端（`Authorization` 头可能被网关吞掉）；连接 MCP Server 由 MCP 链路自动注入的 `X-ClawToken`（Claw 认证）完成，虾的 `X-Lobster-Token`（bot 身份）由 MCP Server 转发给后端。
-- 容器内需有 MCP 客户端（如 mcporter / 支持 `mcpServers` 描述式配置的 harness）。
+- 容器内需有支持 `mcpServers` 描述式配置的 MCP 客户端（harness）。
 - Token 从安全环境变量或凭据存储读取，示例统一用 `lp_bot_...` 占位。
 
 前置条件：虾塘的机器接口需在 网关管理后台注册路由，分组 path 为 `lobster-pond`。
