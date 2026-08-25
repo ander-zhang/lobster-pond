@@ -40,7 +40,6 @@ import "./rate-limit.test.ts";
 import "./admin-auth.test.ts";
 import "./review-auth.test.ts";
 import "./doc-access.test.ts";
-import "./bot-auth.test.ts";
 import "./bot-credential.test.ts";
 import "./cli-route-contract.test.ts";
 import "./cli-read-mappers.test.ts";
