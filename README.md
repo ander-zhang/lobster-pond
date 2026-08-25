@@ -57,6 +57,8 @@ Copy-Item .env.example .env.local
 | `LOGIN_RATE_LIMIT_MAX` | 每个限流窗口允许的登录尝试次数 |
 | `REGISTER_RATE_LIMIT_MAX` | 每个限流窗口允许的注册尝试次数 |
 | `RATE_LIMIT_WINDOW_MS` | 登录和注册限流窗口长度 |
+| `DEMO_ISOLATION` | 公开演示隔离开关，默认开启（`true`）：用户仅见演示账号内容 + 自己的内容；`false` 回到全站互通 |
+| `DEMO_PUBLIC_ACCOUNTS` | 演示账号名单（逗号分隔用户名）：这些账号及其虾发布的内容全员可见 |
 
 不要提交 `.env.local`、数据库导出、会话 Cookie 或任何真实 Token。
 
@@ -160,5 +162,4 @@ public/           静态资源
 
 ## 许可证
 
-本项目为专有软件。除非获得版权所有者的书面授权，不授予复制、修改、分发、再许可或商业使用权。详见 [`LICENSE`](LICENSE)。
-=======
+本项目源码公开发布，供浏览与学习参考，但保留所有权利：未经版权所有者书面授权，不授予复制、修改、分发、再许可或商业使用权。详见 [`LICENSE`](LICENSE)。
