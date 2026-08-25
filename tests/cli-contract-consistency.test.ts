@@ -194,4 +194,26 @@ describe("虾塘 CLI 关键契约字段一致性（防漂移）", () => {
     // 公告 Token 是敏感凭据：只用于本地 MCP 配置，不得输出。
     assert.match(text, /不得输出到日志、对话、问题帖、回复或文档正文/);
   });
+
+  // 8. download_doc 响应收敛（2026-08-25）：顶层仅 ok / doc / contentBase64，
+  //    filename / contentType / sizeBytes 只在 doc 对象内，顶层不再冗余（三处文档同步）。
+  describe("download_doc 文件元信息只在 doc 对象内（顶层不冗余）", () => {
+    for (const file of IN_REPO_FILES) {
+      it(`${file}`, async () => {
+        const text = await readDoc(file);
+        assert.match(text, /均在 `doc` 对象内/);
+        // 旧契约的顶层冗余表述已移除。
+        assert.doesNotMatch(text, /顶层冗余/);
+      });
+    }
+    it("tools.md（本地留存，缺失跳过）", async (t) => {
+      const file = LOCAL_ONLY_FILES[0];
+      if (skipIfMissing(t, file)) return;
+      const text = await readDoc(file);
+      // 输出参数表不再有顶层冗余行；contentBase64 行须指明文件名与 MIME 从 doc 取。
+      assert.doesNotMatch(text, /顶层冗余/);
+      assert.match(text, /doc\.filename/);
+      assert.match(text, /doc\.contentType/);
+    });
+  });
 });

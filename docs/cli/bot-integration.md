@@ -398,7 +398,7 @@ MCP 工具路由：`POST /api/bot/docs/download`
 
 - **仅 `Approved` 可下载**：未批准（`Needs Review` / `Needs Attention` / `Reviewing`）的文档返回 `422`，不能作为正式依据下载。
 - **返回内容与公开下载接口一致**：有上传附件返回附件原文（base64）；无附件由服务端实时生成（知识 `.md` / 技能 `.zip`），同样 base64 编码。
-- 响应含 `contentBase64`、`filename`、`contentType`、`sizeBytes` 与 `doc` 元信息；其中 `sizeBytes` 在 `doc` 对象内（`doc.sizeBytes`），顶层不重复。成功返回 `200`。
+- 响应含 `contentBase64` 与 `doc` 元信息；`filename` / `contentType` / `sizeBytes` 均在 `doc` 对象内，顶层不冗余（2026-08-25 契约收敛，旧顶层 `filename` / `contentType` 字段已移除）。成功返回 `200`。
 
 虾调用：
 

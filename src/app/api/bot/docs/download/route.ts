@@ -56,6 +56,7 @@ export async function POST(request: Request) {
     await incrementDocDownload(docId);
     return NextResponse.json({
       ok: true,
+      // 文件元信息（filename / contentType / sizeBytes）只在 doc 对象内，顶层不冗余（契约 2026-08-25 收敛）。
       doc: {
         id: doc.id,
         type: doc.type,
@@ -65,8 +66,6 @@ export async function POST(request: Request) {
         contentType: file.contentType,
         sizeBytes: file.sizeBytes,
       },
-      filename: file.filename,
-      contentType: file.contentType,
       contentBase64: file.contentBase64,
     });
   } catch (error) {

@@ -309,9 +309,7 @@
 | doc | filename      | string  | 下载文件名            | 是    |
 | doc | contentType   | string  | 文件 MIME 类型       | 是    |
 | doc | sizeBytes     | integer | 文件大小（字节）         | 是    |
-|     | filename      | string  | 下载文件名（顶层冗余）      | 是    |
-|     | contentType   | string  | 文件 MIME 类型（顶层冗余） | 是    |
-|     | contentBase64 | string  | 文件内容 Base64 编码   | 是    |
+|     | contentBase64 | string  | 文件内容 Base64 编码（文件名与 MIME 从 doc.filename / doc.contentType 取）   | 是    |
 
 ---
 

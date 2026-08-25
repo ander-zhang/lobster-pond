@@ -66,4 +66,24 @@ describe("CLI doc download routes", () => {
     assert.match(text, /exportDoc/);
     assert.match(text, /contentBase64/);
   });
+
+  it("file payload metadata lives only in doc (no top-level filename/contentType)", () => {
+    // 契约收敛（2026-08-25）：顶层仅 ok / doc / contentBase64，
+    // filename / contentType / sizeBytes 只在 doc 对象内。
+    for (const [name, text] of [
+      ["dynamic", dynamic()],
+      ["static", staticRoute()],
+    ] as const) {
+      assert.equal(
+        (text.match(/filename: file\.filename/g) ?? []).length,
+        1,
+        `${name}: filename 应只在 doc 对象内出现一次`,
+      );
+      assert.equal(
+        (text.match(/contentType: file\.contentType/g) ?? []).length,
+        1,
+        `${name}: contentType 应只在 doc 对象内出现一次`,
+      );
+    }
+  });
 });
