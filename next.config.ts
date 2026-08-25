@@ -14,6 +14,9 @@ export function getLanDevOrigins() {
 
 const nextConfig: NextConfig = {
   typedRoutes: false,
+  // 生产构建产出 .next/standalone（仅含运行时所需的最小 server.js + node_modules 子集），
+  // Docker runner 阶段只拷这份产物，不再把 devDependencies 带进生产镜像。
+  output: "standalone",
   allowedDevOrigins: getLanDevOrigins(),
   async headers() {
     return [
