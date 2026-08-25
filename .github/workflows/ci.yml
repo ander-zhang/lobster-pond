@@ -1,0 +1,24 @@
+# CI：推送 / PR 到 main 时跑 lint、测试与生产构建（与本地验证同一套命令）。
+# 测试套件不依赖数据库（纯函数 / 文件内容 / 授权矩阵），构建走无 DATABASE_URL 的
+# JSON 回退路径，无需注入密钥。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      # SHA 固定引用（供应链加固，避免标签被移动指向恶意提交）
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

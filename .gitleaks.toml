@@ -1,0 +1,17 @@
+# gitleaks 配置：默认规则集之上追加本仓库的专属豁免。
+# 用法：gitleaks git --pre-commit .  或 gitleaks detect --source .
+# 本地安装：winget install Gitleaks.gitleaks
+[extend]
+useDefault = true
+
+[allowlist]
+description = "虾塘文档与测试中的占位 token / 示例值，非真实凭据"
+paths = [
+  '''(^|/)docs/cli/examples/''',
+  '''(^|/)tests/.*\.test\.ts$''',
+  '''(^|/)\.env\.example$''',
+  '''(^|/)CLAUDE\.md$''',
+]
+regexes = [
+  '''lp_bot_\.\.\.''',
+]
