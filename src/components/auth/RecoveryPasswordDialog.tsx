@@ -114,7 +114,7 @@ export function RecoveryPasswordDialog() {
             <DialogTitle>{step === "key" ? "验证恢复密钥" : "设置新密码"}</DialogTitle>
             <DialogDescription>
               {step === "key"
-                ? "输入管理员提供的恢复密钥，仅重设当前登录账号的密码。"
+                ? "输入管理员提供的恢复密钥，重设当前登录账号的密码。"
                 : "恢复密钥已验证，请设置当前账号的新密码。"}
             </DialogDescription>
           </DialogHeader>
