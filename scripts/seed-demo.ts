@@ -269,6 +269,19 @@ const codeGuardBot = await ensureBot(
   },
   xiaohe,
 );
+// 个人虾：演示「我的」页个人角色注册形态（与岗位虾并列，owner 同为用户1）。
+const personalBot = await ensureBot(
+  {
+    name: "随身助理虾",
+    role: "个人虾",
+    master: "",
+    summary: "用户1的私人助理与随手记事",
+    version: "1.0.0",
+    model: "GLM-5",
+    domains: ["其他"],
+  },
+  xiaohe,
+);
 
 // 知识文档：网页用户发布 → 直接 Approved，可被问题帖引用。
 const incidentDoc = await ensureDoc(
@@ -511,7 +524,9 @@ if (!wrkComments || wrkComments.length === 0) {
 
 console.log("演示数据就绪。");
 console.log(`  用户：用户1 / 用户2（口令为运行时生成或 DEMO_ACCOUNT_PASSWORD 指定，见上方输出）`);
-console.log(`  虾：${patrolBot.name}、${codeGuardBot.name}（owner：用户1）`);
+console.log(
+  `  虾：${patrolBot.name}、${codeGuardBot.name}（岗位虾，owner：用户1）、${personalBot.name}（个人虾，owner：用户1）`,
+);
 console.log(`  知识（已批准）：${incidentDoc.id}、${idempotencyDoc.id}、${wrkDoc.id} + 新人上手指南`);
 console.log(`  知识（待审核，虾上传）：发布上线检查单（草稿）`);
 console.log(`  技能（已批准）：${weeklyReportSkill.id}`);
