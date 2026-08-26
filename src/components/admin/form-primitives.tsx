@@ -45,9 +45,9 @@ export function TextField({
         onChange={(event) => onChange(event.target.value)}
       />
       <span className="mt-1 block text-xs text-[var(--text-muted)]">
-        {hint ? <span className="block">{hint}</span> : null}
+        {hint ? <span>{hint}</span> : null}
         {maxLength !== undefined ? (
-          <span className="block text-right tabular-nums">
+          <span className="ml-2 tabular-nums">
             {value.length}/{maxLength}
           </span>
         ) : null}
