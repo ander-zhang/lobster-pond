@@ -287,10 +287,17 @@ function buildGovernanceRows(
   const rows: GovernanceRow[] = [
     { label: "ID", value: doc.id },
     { label: reviewing ? "驳回者" : "发布者", value: reviewing ? doc.rejector ?? "未知" : authorName ?? "未署名" },
-    // 审批人：仅已批准且由虾发布的文档展示——执行"审批通过"操作的用户（owner 或被转审人）。
-    // 网页端用户发布的文档发布即自审批准，审批人恒为作者本人，与发布者重复，不再展示。
-    // 历史已批准（此列上线前）→ "未记录"。
-    ...(approved && doc.authorUserId == null ? [{ label: "审批人", value: doc.approver ?? "未记录" }] : []),
+    // 审批人 / 转审对象（占原审批人位，批准时间上方）：
+    // - 未转审：仅已批准且由虾发布的文档展示审批人（owner 审批）。网页端用户发布的文档发布即
+    //   自审批准，审批人恒为作者本人，与发布者重复，不再展示；历史已批准（此列上线前）→ "未记录"。
+    // - 已转审（reviewTransferredToUserId 非空）：审批由被转审人执行，审批人与转审对象重复，
+    //   改在此位置展示转审对象，不再单独显示审批人与转审时间（转审一经生效不可撤销）。
+    ...(approved && doc.authorUserId == null && !doc.reviewTransferredToUserId
+      ? [{ label: "审批人", value: doc.approver ?? "未记录" }]
+      : []),
+    ...(doc.reviewTransferredToUserId
+      ? [{ label: "转审对象", value: transferredUsername ?? "未知用户" }]
+      : []),
     { label: reviewing ? "驳回时间" : "批准时间", value: reviewing ? formatDateTime(doc.rejectedAt ?? null) : formatDateOnly(doc.approvedAt ?? (doc.contentState === "Approved" ? (doc.createdAt ?? doc.updatedAt) : null)) },
     // 更新时间：revised_at 非空时按「年/月/日 时:分」展示修订时刻（含年份，与只存日期的
     // updatedAt 区分）；回退到旧判定时只有日期，按 formatDateOnly 展示 updatedAt（含年份无时分）。
@@ -298,14 +305,6 @@ function buildGovernanceRows(
       ? [{ label: "更新时间", value: doc.revisedAt ? formatDateTime(doc.revisedAt) : formatDateOnly(doc.updatedAt) }]
       : []),
     { label: "状态", value: approved ? "已批准" : contentStateLabel(doc.contentState) },
-    // 转审信息：审批权已转交（reviewTransferredToUserId 非空）时展示——
-    // 被转审人接管批准 / 驳回，原 owner（岗位虾主人）不再拥有审批权。
-    ...(doc.reviewTransferredToUserId
-      ? [
-          { label: "转审对象", value: transferredUsername ?? "未知用户" },
-          { label: "转审时间", value: formatDateTime(doc.reviewTransferredAt ?? null) },
-        ]
-      : []),
     { label: doc.type === "knowledge" ? "领域" : "场景", value: doc.type === "knowledge" ? (domainLabel(doc.domain) || "未分类") : (scenarioLabel(doc.scenario ?? null) || "未分类") },
     // 种别 / 类型仅知识文档展示（技能不受三级分类约束）；经验无三级类型（subtype 噌空），
     // 故类型行仅在 subtype 存在时渲染，与标题上方徽标的显隐条件一致。
