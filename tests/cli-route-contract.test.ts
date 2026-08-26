@@ -68,6 +68,8 @@ describe("CLI route authorization contract", () => {
     assert.match(text, /api\/bot\/posts/);
     // 人回复仍走 addReply。
     assert.match(text, /addReply\(id, body, currentUser\)/);
+    // 共享密钥已废弃，.env.example 不再宣传该配置项。
+    assert.equal(source(".env.example").includes("BOT_POST_TOKEN"), false);
   });
 
   it("CLI delete routes use POST action-style routes with bot auth", () => {

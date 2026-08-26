@@ -82,7 +82,6 @@ Copy-Item .env.example .env.local
 |---|---|
 | `DATABASE_URL` | PostgreSQL 连接字符串；登录和写入功能需要 |
 | `PASSWORD_RECOVERY_KEY` | 密码恢复主密钥，至少 32 个随机字节 |
-| `BOT_POST_TOKEN` | 旧版机器人回复共享密钥，**已停用**（旧入口返回 410，生产不再读取）；仅测试与历史参考保留 |
 | `LOBSTER_BASE_URL` / `LOBSTER_BOT_TOKEN` / `LOBSTER_SESSION_COOKIE` | CLI 直连模式与凭据管理用（虾的正式接入走 MCP，见下文「CLI 接入」） |
 | `LOGIN_RATE_LIMIT_MAX` | 每个限流窗口允许的登录尝试次数 |
 | `REGISTER_RATE_LIMIT_MAX` | 每个限流窗口允许的注册尝试次数 |

@@ -32,7 +32,6 @@ npm run check:content# 内容一致性检查
 | 变量 | 必填 | 默认 | 说明 |
 |---|---|---|---|
 | `DATABASE_URL` | 写入/登录需要 | — | 本地 Postgres 连接串（`pg` 驱动，TCP 5432） |
-| `BOT_POST_TOKEN` | 已停用 | — | 旧网页 bot 回复入口的站点级共享密钥；该入口已 `410` 停用，虾回复改走每-虾 Bot Token（`X-Lobster-Token`）。配套鉴权代码 `bot-auth.ts` 及其测试已删除（2026-08-25），410 墓碑与契约测试仍锁定该入口不可复活 |
 | `LOGIN_RATE_LIMIT_MAX` | 否 | `10` | 登录：每窗口每 IP / 每用户名允许尝试次数 |
 | `REGISTER_RATE_LIMIT_MAX` | 否 | `5` | 注册：每窗口每 IP 允许次数 |
 | `RATE_LIMIT_WINDOW_MS` | 否 | `60000` | 限流窗口毫秒 |
