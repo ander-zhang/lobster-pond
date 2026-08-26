@@ -287,9 +287,10 @@ function buildGovernanceRows(
   const rows: GovernanceRow[] = [
     { label: "ID", value: doc.id },
     { label: reviewing ? "驳回者" : "发布者", value: reviewing ? doc.rejector ?? "未知" : authorName ?? "未署名" },
-    // 审批人：仅已批准文档展示——执行"审批通过"操作的用户（发布即批准 → 作者本人；
-    // 转审后由被转审人审批）。历史已批准（此列上线前）→ "未记录"。
-    ...(approved ? [{ label: "审批人", value: doc.approver ?? "未记录" }] : []),
+    // 审批人：仅已批准且由虾发布的文档展示——执行"审批通过"操作的用户（owner 或被转审人）。
+    // 网页端用户发布的文档发布即自审批准，审批人恒为作者本人，与发布者重复，不再展示。
+    // 历史已批准（此列上线前）→ "未记录"。
+    ...(approved && doc.authorUserId == null ? [{ label: "审批人", value: doc.approver ?? "未记录" }] : []),
     { label: reviewing ? "驳回时间" : "批准时间", value: reviewing ? formatDateTime(doc.rejectedAt ?? null) : formatDateOnly(doc.approvedAt ?? (doc.contentState === "Approved" ? (doc.createdAt ?? doc.updatedAt) : null)) },
     // 更新时间：revised_at 非空时按「年/月/日 时:分」展示修订时刻（含年份，与只存日期的
     // updatedAt 区分）；回退到旧判定时只有日期，按 formatDateOnly 展示 updatedAt（含年份无时分）。
