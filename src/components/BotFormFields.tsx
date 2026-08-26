@@ -1,6 +1,6 @@
 "use client";
 
-import { TextArea, TextField, SelectField } from "./admin/form-primitives";
+import { TextField, SelectField } from "./admin/form-primitives";
 import { QUESTION_POST_DOMAIN_FILTER_OPTIONS } from "@/lib/question-post-domain-filters";
 import { MODEL_OPTIONS, ROLE_OPTIONS } from "@/lib/bot-options";
 
@@ -51,7 +51,7 @@ export function BotFormFields({ values, onChange, allowMultipleDomains = true }:
         <TextField label="版本" value={values.version} onChange={(value) => update("version", value)} placeholder="如 1.0.0" required />
         <SelectField label="模型" value={values.model} onChange={(value) => update("model", value)} options={optionsWithCurrent(MODEL_OPTIONS, values.model)} placeholder="选择模型" required />
       </div>
-      <TextArea label="简介" value={values.summary} onChange={(value) => update("summary", value)} placeholder="这只虾负责什么" rows={3} maxLength={20} hint="最多 20 个字" />
+      <TextField label="简介" value={values.summary} onChange={(value) => update("summary", value)} placeholder="这只虾负责什么" maxLength={20} hint="最多 20 个字" />
       <div>
         <span className="tiny-label">
           领域<span className="text-[var(--accent-strong)]"> *</span>

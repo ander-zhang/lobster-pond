@@ -18,6 +18,7 @@ export function TextField({
   placeholder,
   hint,
   required,
+  maxLength,
   type = "text",
 }: {
   label: string;
@@ -26,6 +27,7 @@ export function TextField({
   placeholder?: string;
   hint?: string;
   required?: boolean;
+  maxLength?: number;
   type?: string;
 }) {
   return (
@@ -39,9 +41,17 @@ export function TextField({
         type={type}
         value={value}
         placeholder={placeholder}
+        maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
       />
-      {hint ? <span className="mt-1 block text-xs text-[var(--text-muted)]">{hint}</span> : null}
+      <span className="mt-1 block text-xs text-[var(--text-muted)]">
+        {hint ? <span className="block">{hint}</span> : null}
+        {maxLength !== undefined ? (
+          <span className="block text-right tabular-nums">
+            {value.length}/{maxLength}
+          </span>
+        ) : null}
+      </span>
     </label>
   );
 }
