@@ -1,27 +1,25 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { VERSION_OPTIONS } from "../src/lib/bot-options.ts";
+import { MODEL_OPTIONS, ROLE_OPTIONS } from "../src/lib/bot-options.ts";
 
-// 把 "1.2.0" 解析成可比较的 [major, minor, patch] 元组（与全站文档版本约定一致，无 v 前缀）。
-function parseVersion(value: string): [number, number, number] {
-  const match = value.match(/^(\d+)\.(\d+)\.(\d+)$/);
-  assert.ok(match, `版本 ${value} 不符合 X.Y.Z 格式`);
-  return [Number(match[1]), Number(match[2]), Number(match[3])];
-}
+// 版本已改为自定义输入（无选项列表）；这里锁定下拉选项的基本卫生条件。
 
-describe("VERSION_OPTIONS", () => {
-  it("按 semver 降序排列（最新在前），无重复", () => {
-    const versions = VERSION_OPTIONS.map((option) => option.value);
-    assert.deepEqual(new Set(versions).size, versions.length, "版本列表不得重复");
-
-    const tuples = versions.map(parseVersion);
-    for (let i = 1; i < tuples.length; i++) {
-      const prev = tuples[i - 1]!;
-      const curr = tuples[i]!;
-      assert.ok(
-        prev[0] > curr[0] || (prev[0] === curr[0] && (prev[1] > curr[1] || (prev[1] === curr[1] && prev[2] > curr[2]))),
-        `版本顺序错误：${versions[i - 1]} 应排在 ${versions[i]} 之前`,
-      );
+describe("MODEL_OPTIONS", () => {
+  it("非空且无重复、无空白值", () => {
+    assert.ok(MODEL_OPTIONS.length > 0, "模型选项不得为空列表");
+    const values = MODEL_OPTIONS.map((option) => option.value);
+    assert.deepEqual(new Set(values).size, values.length, "模型选项不得重复");
+    for (const value of values) {
+      assert.ok(value.trim().length > 0, `模型选项不得为空白值：${JSON.stringify(value)}`);
     }
+  });
+});
+
+describe("ROLE_OPTIONS", () => {
+  it("覆盖个人虾 / 岗位虾两值", () => {
+    assert.deepEqual(
+      ROLE_OPTIONS.map((option) => option.value),
+      ["个人虾", "岗位虾"],
+    );
   });
 });

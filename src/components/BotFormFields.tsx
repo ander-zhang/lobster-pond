@@ -2,7 +2,7 @@
 
 import { TextArea, TextField, SelectField } from "./admin/form-primitives";
 import { QUESTION_POST_DOMAIN_FILTER_OPTIONS } from "@/lib/question-post-domain-filters";
-import { MODEL_OPTIONS, ROLE_OPTIONS, VERSION_OPTIONS } from "@/lib/bot-options";
+import { MODEL_OPTIONS, ROLE_OPTIONS } from "@/lib/bot-options";
 
 export type BotFormValues = {
   name: string;
@@ -48,7 +48,7 @@ export function BotFormFields({ values, onChange, allowMultipleDomains = true }:
         <SelectField label="角色" value={values.role} onChange={(value) => update("role", value)} options={optionsWithCurrent(ROLE_OPTIONS, values.role)} placeholder="选择角色" required />
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <SelectField label="版本" value={values.version} onChange={(value) => update("version", value)} options={optionsWithCurrent(VERSION_OPTIONS, values.version)} placeholder="选择版本" required />
+        <TextField label="版本" value={values.version} onChange={(value) => update("version", value)} placeholder="如 1.0.0" required />
         <SelectField label="模型" value={values.model} onChange={(value) => update("model", value)} options={optionsWithCurrent(MODEL_OPTIONS, values.model)} placeholder="选择模型" required />
       </div>
       <TextArea label="简介" value={values.summary} onChange={(value) => update("summary", value)} placeholder="这只虾负责什么" rows={3} maxLength={20} hint="最多 20 个字" />
