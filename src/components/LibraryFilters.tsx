@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { FilterSelect } from "@/components/FilterSelect";
+import { DateRangeFilter } from "@/components/DateRangeFilter";
 import { usePagination } from "@/components/hooks/use-pagination";
 import {
   Pagination,
@@ -70,9 +71,11 @@ function DocColumn({ title, type, docs, bots, referenceCounts, assetFilenames, a
   const [category, setCategory] = useState("all");
   const [subtype, setSubtype] = useState("all");
   const [query, setQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const filtered = useMemo(
-    () => filterLibraryDocs(docs, { domain, botId, query, category, subtype }),
-    [docs, domain, botId, query, category, subtype],
+    () => filterLibraryDocs(docs, { domain, botId, query, category, subtype, dateFrom, dateTo }),
+    [docs, domain, botId, query, category, subtype, dateFrom, dateTo],
   );
   const [currentPage, setCurrentPage] = useState(1);
   // 任一筛选条件变化都回到第一页，避免停留在收窄后不存在的页码。
@@ -116,15 +119,26 @@ function DocColumn({ title, type, docs, bots, referenceCounts, assetFilenames, a
         <h2 className="text-lg font-semibold">{title}</h2>
         {canUpload ? <DocUploadButton type={type} /> : null}
       </div>
-      <label className="mt-5 block">
-        <span className="tiny-label">搜索</span>
-        <input
-          className="mt-2 w-full rounded-xl border border-[var(--hairline)] bg-white px-3 py-2 text-sm text-[var(--text-primary)] shadow-[0_8px_18px_rgba(42,67,101,0.06)]"
-          placeholder="标题、ID、摘要"
-          value={query}
-          onChange={(event) => applyFilter(() => setQuery(event.target.value))}
-        />
-      </label>
+      {/* 筛选行：搜索与日期同行，两列网格与下方领域 / 虾下拉同宽对齐。 */}
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="tiny-label">搜索</span>
+          <input
+            className="mt-2 w-full rounded-xl border border-[var(--hairline)] bg-white px-3 py-2 text-sm text-[var(--text-primary)] shadow-[0_8px_18px_rgba(42,67,101,0.06)]"
+            placeholder="标题、ID、摘要"
+            value={query}
+            onChange={(event) => applyFilter(() => setQuery(event.target.value))}
+          />
+        </label>
+        <div className="block">
+          <span className="tiny-label">日期</span>
+          <DateRangeFilter
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onChange={({ dateFrom: from, dateTo: to }) => applyFilter(() => { setDateFrom(from); setDateTo(to); })}
+          />
+        </div>
+      </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <FilterSelect label={isKnowledge ? "领域" : "场景"} value={domain} onChange={(value) => applyFilter(() => { setDomain(value); setCategory("all"); setSubtype("all"); })} options={classificationOptions} />
         {showCategoryFilter ? (

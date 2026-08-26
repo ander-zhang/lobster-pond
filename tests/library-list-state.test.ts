@@ -48,3 +48,33 @@ describe("filterLibraryDocs 种别 / 类型筛选", () => {
     assert.equal(out.length, 3);
   });
 });
+
+describe("filterLibraryDocs 日期筛选", () => {
+  // createdAt 为 timestamptz（取 UTC 正午，平台时区 Asia/Shanghai 归桶不跨日）；
+  // 无 createdAt 的回退 updatedAt（YYYY-MM-DD 文本，与审核治理队列同源）。
+  const docs = [
+    { id: "a", type: "knowledge", title: "A", summary: "", domain: "运维与部署", ownerBotIds: [], createdAt: "2026-08-05T12:00:00Z" },
+    { id: "b", type: "knowledge", title: "B", summary: "", domain: "运维与部署", ownerBotIds: [], createdAt: "2026-08-20T12:00:00Z" },
+    { id: "c", type: "knowledge", title: "C", summary: "", domain: "运维与部署", ownerBotIds: [], updatedAt: "2026-07-15" },
+  ] as never[];
+
+  it("dateFrom 只保留起始日及之后的文档", () => {
+    const out = filterLibraryDocs(docs, { domain: "all", botId: "all", dateFrom: "2026-08-01" });
+    assert.deepEqual(out.map((d: { id: string }) => d.id), ["a", "b"]);
+  });
+
+  it("dateTo 只保留截止日及之前的文档", () => {
+    const out = filterLibraryDocs(docs, { domain: "all", botId: "all", dateTo: "2026-08-10" });
+    assert.deepEqual(out.map((d: { id: string }) => d.id), ["a", "c"]);
+  });
+
+  it("起止同时给定为闭区间", () => {
+    const out = filterLibraryDocs(docs, { domain: "all", botId: "all", dateFrom: "2026-08-01", dateTo: "2026-08-31" });
+    assert.deepEqual(out.map((d: { id: string }) => d.id), ["a", "b"]);
+  });
+
+  it("缺省不过滤", () => {
+    const out = filterLibraryDocs(docs, { domain: "all", botId: "all" });
+    assert.equal(out.length, 3);
+  });
+});
