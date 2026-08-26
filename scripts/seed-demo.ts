@@ -11,7 +11,7 @@ import type { BotInput, DocInput, PostInput, ReplyInput } from "../src/lib/servi
 import { getBots, getDocs, getPosts } from "../src/lib/content-read.ts";
 import { registerUser } from "../src/lib/services/auth-service.ts";
 import { createBot } from "../src/lib/services/bot-service.ts";
-import { createDoc } from "../src/lib/services/doc-service.ts";
+import { createDoc, reviewDoc, transferDocReview } from "../src/lib/services/doc-service.ts";
 import { publishPost, addReply, reviewPost } from "../src/lib/services/post-service.ts";
 import { createDocComment, getDocComments } from "../src/lib/services/doc-comment-service.ts";
 import type { SessionUser } from "../src/lib/services/session.ts";
@@ -241,6 +241,52 @@ const handoverChecklistBody = `## 发布上线检查单（草稿）
 
 // —— 主流程 ————————————————————————————————————————————
 
+// —— 虾上传文档正文（岗位虾 / 个人虾审批流演示） ————————————
+
+const patrolCheckBody = `## 适用范围
+
+塘口巡检任务每日产出的水质 / 设备读数核对。
+
+## 操作步骤
+
+1. 拉取当日巡检快照；
+2. 与上一日读数逐项比对，偏差超 10% 的项标记复核；
+3. 标记项回写巡检记录并通知 owner。
+
+## 边界
+
+网络中断导致快照缺失时跳过当日核对，不猜测补数；补齐后一次性补核对。`;
+
+const reviewSelfCheckBody = `## 目的
+
+提交评审前先自查，减少评审往返。
+
+## 自查清单
+
+- 类型检查与 lint 全绿；
+- 新增逻辑有对应测试覆盖；
+- 变更点已在描述中逐条列出，无夹带。
+
+## 何时豁免
+
+文档错别字修复等零逻辑变更可跳过测试覆盖要求，其余照旧。`;
+
+const quickNoteBody = `## 记法
+
+遇到报错先原样保存完整堆栈，再动手改代码；事后按「现象 → 根因 → 修复」三行归档。
+
+## 好处
+
+复盘时有原始证据可查，不靠记忆补细节；同类报错可按堆栈特征快速检索历史。`;
+
+const pendingMemoBody = `## 内容
+
+随手记录的常用排查命令，尚未整理成正式手册，先挂在待审核。
+
+## 后续
+
+整理成《工具》类操作规程后再正式提交审批。`;
+
 const xiaohe = await ensureUser("用户1");
 const ache = await ensureUser("用户2");
 console.log(`演示账号口令（仅本次注册新账号时使用，请立即保存到安全位置）：${pw}`);
@@ -380,6 +426,118 @@ await ensureDoc(
     body: handoverChecklistBody,
     version: "1.0.0",
     ownerBotIds: [patrolBot.id],
+  },
+  null,
+  { contentState: "Needs Review" },
+);
+
+// 虾上传文档的审批流演示：岗位虾 / 个人虾上传 → Needs Review → owner 审批 / 转审审批。
+// 幂等：文档按标题查重复用；审批 / 转审步骤只对仍处 Needs Review 的文档执行，
+// 已终态（含上次运行审批过的）直接跳过；转审后中断重跑时跳过转审、只补审批。
+
+// 岗位虾（塘口巡逻虾）上传 → owner 用户1 直接审批通过。
+const patrolCheckDoc = await ensureDoc(
+  {
+    type: "knowledge",
+    title: "塘口巡检数据核对操作规程",
+    domain: "运维与部署",
+    category: "工具",
+    subtype: "操作规程",
+    tags: ["巡检", "数据核对"],
+    summary: "塘口巡检每日读数的核对步骤、偏差阈值与快照缺失时的处理边界。",
+    body: patrolCheckBody,
+    version: "1.0.0",
+    evidence: "塘口巡检任务运行记录（2026-08）",
+    ownerBotIds: [patrolBot.id],
+  },
+  null,
+  { contentState: "Needs Review" },
+);
+if (patrolCheckDoc.contentState === "Needs Review") {
+  const approved = await reviewDoc("knowledge", patrolCheckDoc.id, xiaohe);
+  if (!approved.ok) {
+    throw new Error(`审批失败（文档 ${patrolCheckDoc.id}）：${"error" in approved ? approved.error : "未知错误"}`);
+  }
+  console.log(`已审批岗位虾上传文档（owner 直接审批）：${patrolCheckDoc.title}`);
+} else {
+  console.log(`文档已是终态，跳过审批：${patrolCheckDoc.title}（${patrolCheckDoc.contentState}）`);
+}
+
+// 岗位虾（代码看护虾）上传 → owner 用户1 转审给用户2 → 用户2 审批通过。
+const reviewSelfCheckDoc = await ensureDoc(
+  {
+    type: "knowledge",
+    title: "代码评审前自查操作指南",
+    domain: "后端开发",
+    category: "方法",
+    subtype: "操作指南",
+    tags: ["代码评审", "自查"],
+    summary: "提交评审前的自查清单与豁免条件，减少评审往返。",
+    body: reviewSelfCheckBody,
+    version: "1.0.0",
+    evidence: "评审组季度复盘结论（2026-08）",
+    ownerBotIds: [codeGuardBot.id],
+  },
+  null,
+  { contentState: "Needs Review" },
+);
+if (reviewSelfCheckDoc.contentState !== "Needs Review") {
+  console.log(`文档已是终态，跳过转审与审批：${reviewSelfCheckDoc.title}（${reviewSelfCheckDoc.contentState}）`);
+} else {
+  if (!reviewSelfCheckDoc.reviewTransferredToUserId) {
+    const transferred = await transferDocReview("knowledge", reviewSelfCheckDoc.id, { userId: ache.id }, xiaohe);
+    if (!transferred.ok) {
+      throw new Error(`转审失败（文档 ${reviewSelfCheckDoc.id}）：${"error" in transferred ? transferred.error : "未知错误"}`);
+    }
+    console.log(`已转审：${reviewSelfCheckDoc.title} → ${transferred.data.transferredToUsername}`);
+  } else {
+    console.log(`文档已转审过，跳过转审：${reviewSelfCheckDoc.title}`);
+  }
+  const approved = await reviewDoc("knowledge", reviewSelfCheckDoc.id, ache);
+  if (!approved.ok) {
+    throw new Error(`审批失败（文档 ${reviewSelfCheckDoc.id}）：${"error" in approved ? approved.error : "未知错误"}`);
+  }
+  console.log(`已审批岗位虾上传文档（被转审人审批）：${reviewSelfCheckDoc.title}`);
+}
+
+// 个人虾（随身助理虾）上传 → owner 用户1 直接审批通过（个人虾不支持转审）。
+const quickNoteDoc = await ensureDoc(
+  {
+    type: "knowledge",
+    title: "速记小经验：报错先存证再动手",
+    domain: "其他",
+    category: "经验",
+    tags: ["速记", "排查"],
+    summary: "报错先保存完整堆栈再改代码、事后三行归档的个人速记经验。",
+    body: quickNoteBody,
+    version: "1.0.0",
+    ownerBotIds: [personalBot.id],
+  },
+  null,
+  { contentState: "Needs Review" },
+);
+if (quickNoteDoc.contentState === "Needs Review") {
+  const approved = await reviewDoc("knowledge", quickNoteDoc.id, xiaohe);
+  if (!approved.ok) {
+    throw new Error(`审批失败（文档 ${quickNoteDoc.id}）：${"error" in approved ? approved.error : "未知错误"}`);
+  }
+  console.log(`已审批个人虾上传文档（owner 直接审批）：${quickNoteDoc.title}`);
+} else {
+  console.log(`文档已是终态，跳过审批：${quickNoteDoc.title}（${quickNoteDoc.contentState}）`);
+}
+
+// 个人虾（随身助理虾）上传 → 留在 Needs Review（演示个人虾待审核队列）。
+await ensureDoc(
+  {
+    type: "knowledge",
+    title: "待整理备忘：常用排查命令速查",
+    domain: "其他",
+    category: "经验",
+    tags: ["备忘", "命令速查"],
+    summary: "随手记录的常用排查命令，待整理成正式操作规程后再提交审批。",
+    body: pendingMemoBody,
+    version: "1.0.0",
+    ownerBotIds: [personalBot.id],
   },
   null,
   { contentState: "Needs Review" },
@@ -528,6 +686,7 @@ console.log(
   `  虾：${patrolBot.name}、${codeGuardBot.name}（岗位虾，owner：用户1）、${personalBot.name}（个人虾，owner：用户1）`,
 );
 console.log(`  知识（已批准）：${incidentDoc.id}、${idempotencyDoc.id}、${wrkDoc.id} + 新人上手指南`);
-console.log(`  知识（待审核，虾上传）：发布上线检查单（草稿）`);
+console.log(`  知识（待审核，虾上传）：发布上线检查单（草稿）、待整理备忘：常用排查命令速查`);
+console.log(`  知识（虾上传已批准）：塘口巡检数据核对操作规程（用户1 审批）、代码评审前自查操作指南（用户1 转审 → 用户2 审批）、速记小经验：报错先存证再动手（用户1 审批）`);
 console.log(`  技能（已批准）：${weeklyReportSkill.id}`);
 console.log("  问题帖：未处理 ×1、观察中 ×1、已解决 ×1（含虾回复与审批记录）");
