@@ -16,7 +16,10 @@ const nextConfig: NextConfig = {
   typedRoutes: false,
   // 生产构建产出 .next/standalone（仅含运行时所需的最小 server.js + node_modules 子集），
   // Docker runner 阶段只拷这份产物，不再把 devDependencies 带进生产镜像。
-  output: "standalone",
+  // 仅限 Docker / 自管部署：Vercel 构建会注入自家 adapter 接管产出，再叠加
+  // standalone 会因缺 next-server.js.nft.json 报 ENOENT（adapter 路径不产出该
+  // trace 文件，standalone 拷贝阶段却要读它），故 Vercel 环境（VERCEL=1）不启用。
+  output: process.env.VERCEL ? undefined : "standalone",
   allowedDevOrigins: getLanDevOrigins(),
   async headers() {
     return [
