@@ -39,6 +39,9 @@ import "./change-username.test.ts";
 import "./rate-limit.test.ts";
 import "./admin-auth.test.ts";
 import "./review-auth.test.ts";
+// 转审持久化契约：修订走「删行 + 重建」，insertDocQuery 必须写回 review_transferred_*
+// 三列、replaceDoc 必须暂存重建转审通知，否则修订一次审批权就静默回到虾 owner。
+import "./doc-review-transfer-persistence.test.ts";
 import "./doc-access.test.ts";
 import "./bot-credential.test.ts";
 import "./cli-route-contract.test.ts";

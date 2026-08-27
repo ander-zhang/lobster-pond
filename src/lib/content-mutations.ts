@@ -75,7 +75,8 @@ export async function insertDocQuery(doc: MarkdownDoc, sql: Sql) {
     insert into docs (
       id, doc_type, title, tags, domain, category, subtype, scenario, updated_at, owner_bot_ids, summary, body,
       content_state, version, evidence,
-      author_user_id, created_at, revised_at, rejected_at, rejector, rejection_reason, approved_at, approver
+      author_user_id, created_at, revised_at, rejected_at, rejector, rejection_reason, approved_at, approver,
+      review_transferred_to_user_id, review_transferred_at, review_transferred_by_user_id
     )
     values (
       ${doc.id}, ${doc.type}, ${doc.title}, ${JSON.stringify(doc.tags)}::jsonb, ${domain},
@@ -85,7 +86,8 @@ export async function insertDocQuery(doc: MarkdownDoc, sql: Sql) {
       ${doc.authorUserId ?? null}, coalesce(${doc.createdAt ?? null}::timestamptz, now()),
       ${doc.revisedAt ?? null},
       ${doc.rejectedAt ?? null}, ${doc.rejector ?? null}, ${doc.rejectionReason ?? null}, ${doc.approvedAt ?? null},
-      ${doc.approver ?? null}
+      ${doc.approver ?? null},
+      ${doc.reviewTransferredToUserId ?? null}, ${doc.reviewTransferredAt ?? null}, ${doc.reviewTransferredByUserId ?? null}
     )
     on conflict (id) do update set
       doc_type = excluded.doc_type,
@@ -103,7 +105,10 @@ export async function insertDocQuery(doc: MarkdownDoc, sql: Sql) {
       version = excluded.version,
       evidence = excluded.evidence,
       approved_at = excluded.approved_at,
-      approver = excluded.approver
+      approver = excluded.approver,
+      review_transferred_to_user_id = excluded.review_transferred_to_user_id,
+      review_transferred_at = excluded.review_transferred_at,
+      review_transferred_by_user_id = excluded.review_transferred_by_user_id
   `;
 }
 
@@ -138,6 +143,9 @@ export async function replaceDoc(
     const commentNotifications = (await txn`
       select id, recipient_user_id, comment_id, kind, created_at, read_at from doc_comment_notifications where doc_id = ${currentId}
     `) as Array<{ id: string; recipient_user_id: string; comment_id: string; kind: "comment" | "mention"; created_at: string; read_at: string | null }>;
+    const transferNotifications = (await txn`
+      select id, recipient_user_id, kind, created_at, read_at from doc_review_transfer_notifications where doc_id = ${currentId}
+    `) as Array<{ id: string; recipient_user_id: string; kind: string; created_at: string; read_at: string | null }>;
     const oldAssets = (await txn`
       select doc_type, filename, content_type, content_base64, size_bytes
       from doc_assets where doc_id = ${currentId}
@@ -173,6 +181,12 @@ export async function replaceDoc(
     }
     for (const notification of commentNotifications) {
       await txn`insert into doc_comment_notifications (id, recipient_user_id, doc_id, comment_id, kind, created_at, read_at) values (${notification.id}, ${notification.recipient_user_id}, ${doc.id}, ${notification.comment_id}, ${notification.kind}, ${notification.created_at}::timestamptz, ${notification.read_at}::timestamptz)`;
+    }
+
+    // 转审提醒随 docs 行级联删除，暂存后以新 id 重建（转审关系挂在文档上，
+    // 修订不清空转审，被转审人的铃铛提醒也不应随修订消失）。
+    for (const transfer of transferNotifications) {
+      await txn`insert into doc_review_transfer_notifications (id, recipient_user_id, doc_id, kind, created_at, read_at) values (${transfer.id}, ${transfer.recipient_user_id}, ${doc.id}, ${transfer.kind}, ${transfer.created_at}::timestamptz, ${transfer.read_at}::timestamptz)`;
     }
 
     const persistedAsset = asset ?? (oldAssets[0]
